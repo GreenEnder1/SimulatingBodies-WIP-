@@ -1,0 +1,40 @@
+*
+{
+    background-color: #707075;
+    justify-content: center;
+}
+
+Label {
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.section-header
+{
+    font-size: 20px;
+    color: rgb(68, 138, 255);
+    margin-top: 20px;
+}
+
+.horizontal-container
+{
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
+}
+
+.dark-textfield
+{
+    font-size: 10px;
+    color: #E0E0E0;
+    border-color: #000000;
+    border-width: 1px;
+    min-height: 50px;
+    width: 20%;
+}
+
+.dark-textfield:hover
+{
+    background-color: #181B1F;
+}
