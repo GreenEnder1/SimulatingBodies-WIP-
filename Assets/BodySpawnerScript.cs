@@ -10,10 +10,10 @@ public class BodySpawnerScript : MonoBehaviour
     public GameObject bodyObj;
     private BodyScript body;
     public BodyScript[] bodies;
-    public GameObject constantsObj;
-    private Constants Constants;
     private Quaternion initRotation;
     private float timer;
+    public float trigger;
+    public float timeStep;
     public int stepCount;
     private bool active;
     // Start is called before the first frame update
@@ -21,23 +21,22 @@ public class BodySpawnerScript : MonoBehaviour
     {
         initRotation = Quaternion.identity;
         body = bodyObj.GetComponent<BodyScript>();
-        Constants = constantsObj.GetComponent<Constants>();
         bodies = FindObjectsOfType<BodyScript>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (timer > Constants.trigger && active == true)
+        if (timer > trigger && active == true)
         {
             stepCount++;
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.UpdateVelocity(bodies);
+                updateBody.UpdateVelocity(bodies, timeStep);
             };
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.UpdatePosition(stepCount);
+                updateBody.UpdatePosition(stepCount, timeStep);
             }
             timer = 0;
         }
@@ -52,11 +51,11 @@ public class BodySpawnerScript : MonoBehaviour
             stepCount++;
             Parallel.ForEach(bodies, updateBody =>
             {
-                updateBody.UpdateVelocity(bodies);
+                updateBody.UpdateVelocity(bodies, timeStep);
             });
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.UpdatePosition(stepCount);
+                updateBody.UpdatePosition(stepCount, timeStep);
             }
             timer = 0;
         }
@@ -65,7 +64,7 @@ public class BodySpawnerScript : MonoBehaviour
             stepCount--;
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.UpdatePosition(stepCount);
+                updateBody.UpdatePosition(stepCount, timeStep);
             }
             timer = 0;
         }
