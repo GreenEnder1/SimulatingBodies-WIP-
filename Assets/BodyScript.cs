@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 public class BodyScript : MonoBehaviour
 {
-    public float mass; // kg * 10^24
+    public float mass; // kg
     public float radius;
     public Vector3 initVelocity;
     public Vector3 currVelocity;
@@ -17,9 +17,13 @@ public class BodyScript : MonoBehaviour
     public Vector3 acceleration;
     public Vector3 pos;
     private float gravitationalConstant;
+    private float AUtometer;
+    public int posIndex;
     
     public GameObject bodyObj;
+    public GameObject spawnerObj;
     private BodyScript Body;
+    private BodySpawnerScript Spawner;
     private Rigidbody Rigidbody;
 
     // Start is called before the first frame update
@@ -27,18 +31,17 @@ public class BodyScript : MonoBehaviour
     {
         positions.Add(transform.position);
         Body = bodyObj.GetComponent<BodyScript>();
+        Spawner = spawnerObj.GetComponent<BodySpawnerScript>();
         Rigidbody = GetComponent<Rigidbody>();
         currVelocity = initVelocity;
         transform.localScale *= radius;
         pos = transform.position;
-        UnityEngine.Debug.Log(this.name);
-        UnityEngine.Debug.Log(initVelocity);
         gravitationalConstant = 6.6743f * Mathf.Pow(10, -11);
+        AUtometer = 1.496f * Mathf.Pow(10,10);
 
         Renderer rend = bodyObj.GetComponent<Renderer> ();
         rend.material = new Material(Shader.Find("Standard"));
         rend.material.SetColor("_Color", new Color(Random.Range(0.5f, 1.0f), Random.Range(0.8f, 1.0f), Random.Range(0.5f, 1.0f), 1));
-        UnityEngine.Debug.Log("Mass: " + mass);
     }
 
     public void UpdateVelocity(BodyScript[] Bodies, float timeStep)
@@ -47,27 +50,29 @@ public class BodyScript : MonoBehaviour
         {
             if (otherBody != this)
             {
-                float distance = (otherBody.pos - pos).sqrMagnitude;
+                float distance = ((otherBody.pos - pos) * AUtometer).sqrMagnitude;
                 Vector3 accelerationDir = (otherBody.pos - pos).normalized; 
                 float accelerationMag = gravitationalConstant * otherBody.mass / distance;
-                Vector3 acceleration = accelerationMag * accelerationDir;
                 currVelocity += accelerationDir * accelerationMag * timeStep;
                 UnityEngine.Debug.Log("dist: " + distance);
-                UnityEngine.Debug.Log("Acceleration Mag" + accelerationMag);
-                UnityEngine.Debug.Log("Acceleration Dir" + accelerationDir);
-                UnityEngine.Debug.Log("Acc: " + acceleration);
                 UnityEngine.Debug.Log("currVel: " + currVelocity);
             }
         };
     }
 
-    public void UpdatePosition(int stepCount, float timeStep)
+    public void UpdatePosition(float timeStep)
     {
-        if (stepCount > positions.Count-1)
+        if (Spawner.stepCount > positions.Count-1)
         {
-            positions.Add(transform.position + (currVelocity * timeStep));
+            positions.Add(transform.position + (currVelocity * (float)(timeStep/AUtometer)));
         }
-        transform.position = positions[stepCount];
+        transform.position = positions[Spawner.stepCount];
         pos = transform.position;
+        UnityEngine.Debug.Log(this.name + " Remove At: " + positions[0]);
+        if (positions.Count >= 10) 
+        {
+            positions.RemoveAt(0);
+            Spawner.stepCount--;
+        }
     }
 }

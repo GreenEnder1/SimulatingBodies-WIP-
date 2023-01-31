@@ -36,7 +36,7 @@ public class BodySpawnerScript : MonoBehaviour
             };
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.UpdatePosition(stepCount, timeStep);
+                updateBody.UpdatePosition(timeStep);
             }
             timer = 0;
         }
@@ -55,7 +55,7 @@ public class BodySpawnerScript : MonoBehaviour
             });
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.UpdatePosition(stepCount, timeStep);
+                updateBody.UpdatePosition(timeStep);
             }
             timer = 0;
         }
@@ -64,7 +64,7 @@ public class BodySpawnerScript : MonoBehaviour
             stepCount--;
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.UpdatePosition(stepCount, timeStep);
+                updateBody.UpdatePosition(timeStep);
             }
             timer = 0;
         }
