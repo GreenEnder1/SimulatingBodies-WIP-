@@ -2891,7 +2891,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7317171323074501923, guid: f5ab9e8f1faebda41bd8dbbc8ecb4cb6, type: 3}
       propertyPath: timeStep
-      value: 864
+      value: 8640
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f5ab9e8f1faebda41bd8dbbc8ecb4cb6, type: 3}
