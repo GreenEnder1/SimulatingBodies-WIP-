@@ -11,7 +11,7 @@ public class BodyScript : MonoBehaviour
     public float radius;
     public Vector3 initVelocity;
     public Vector3 currVelocity;
-    public List<Vector3> positions = new List<Vector3>();
+    public LinkedList<Vector3> positions = new LinkedList<Vector3>();
     public float distance; //Astronomical Units / 10 OR unity units
     public Vector3 accelerationDir;
     public Vector3 acceleration;
@@ -29,7 +29,7 @@ public class BodyScript : MonoBehaviour
     // Start is called before the first frame update
     public void Start()
     {
-        positions.Add(transform.position);
+        positions.AddLast(transform.position);
         Body = bodyObj.GetComponent<BodyScript>();
         Spawner = spawnerObj.GetComponent<BodySpawnerScript>();
         Rigidbody = GetComponent<Rigidbody>();
@@ -46,34 +46,28 @@ public class BodyScript : MonoBehaviour
 
     public void UpdateVelocity(BodyScript[] Bodies, float timeStep)
     {
-        posIndex++;
         foreach (BodyScript otherBody in Bodies)
         {
             if (otherBody != this)
             {
                 float distance = ((otherBody.pos - pos) * AUtometer).sqrMagnitude;
-                Vector3 accelerationDir = (otherBody.pos - pos).normalized; 
                 float accelerationMag = gravitationalConstant * otherBody.mass / distance;
-                currVelocity += accelerationDir * accelerationMag * timeStep;
-                UnityEngine.Debug.Log("dist: " + distance);
-                UnityEngine.Debug.Log("currVel: " + currVelocity);
+                currVelocity += (otherBody.pos - pos).normalized * accelerationMag * timeStep;
+                // UnityEngine.Debug.Log("dist: " + distance);
+                // UnityEngine.Debug.Log("currVel: " + currVelocity);
             }
         };
     }
 
     public void UpdatePosition(float timeStep)
     {
+        posIndex++;
         if (posIndex > positions.Count-1)
         {
-            positions.Add(transform.position + (currVelocity * (float)(timeStep/AUtometer)));
+            positions.AddLast(transform.position + (currVelocity * (float)(timeStep/AUtometer)));
         }
-        transform.position = positions[posIndex];
+        transform.position = positions.Last.Value;
         pos = transform.position;
-        UnityEngine.Debug.Log(this.name + " Remove At: " + positions[0]);
-        if (positions.Count >= 10) 
-        {
-            positions.RemoveAt(0);
-            posIndex--;
-        }
+        // UnityEngine.Debug.Log(this.name + " Remove At: " + positions.First);
     }
 }

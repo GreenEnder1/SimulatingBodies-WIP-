@@ -15,7 +15,7 @@ public class BodySpawnerScript : MonoBehaviour
     public float trigger;
     public float timeStep;
     public int stepCount;
-    private bool active;
+    private bool active = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -40,34 +40,34 @@ public class BodySpawnerScript : MonoBehaviour
             }
             timer = 0;
         }
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (active) {active = false;}
-            else {active = true;}
-            timer = 0;
-        }
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            stepCount++;
-            Parallel.ForEach(bodies, updateBody =>
-            {
-                updateBody.UpdateVelocity(bodies, timeStep);
-            });
-            foreach (BodyScript updateBody in bodies)
-            {
-                updateBody.UpdatePosition(timeStep);
-            }
-            timer = 0;
-        }
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            stepCount--;
-            foreach (BodyScript updateBody in bodies)
-            {
-                updateBody.UpdatePosition(timeStep);
-            }
-            timer = 0;
-        }
+        // if (Input.GetKeyDown(KeyCode.Space))
+        // {
+        //     if (active) {active = false;}
+        //     else {active = true;}
+        //     timer = 0;
+        // }
+        // if (Input.GetKeyDown(KeyCode.RightArrow))
+        // {
+        //     stepCount++;
+        //     Parallel.ForEach(bodies, updateBody =>
+        //     {
+        //         updateBody.UpdateVelocity(bodies, timeStep);
+        //     });
+        //     foreach (BodyScript updateBody in bodies)
+        //     {
+        //         updateBody.UpdatePosition(timeStep);
+        //     }
+        //     timer = 0;
+        // }
+        // if (Input.GetKeyDown(KeyCode.LeftArrow))
+        // {
+        //     stepCount--;
+        //     foreach (BodyScript updateBody in bodies)
+        //     {
+        //         updateBody.UpdatePosition(timeStep);
+        //     }
+        //     timer = 0;
+        // }
         timer += Time.deltaTime;
     }
 }
