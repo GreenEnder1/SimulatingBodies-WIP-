@@ -46,6 +46,7 @@ public class BodyScript : MonoBehaviour
 
     public void UpdateVelocity(BodyScript[] Bodies, float timeStep)
     {
+        posIndex++;
         foreach (BodyScript otherBody in Bodies)
         {
             if (otherBody != this)
@@ -62,17 +63,17 @@ public class BodyScript : MonoBehaviour
 
     public void UpdatePosition(float timeStep)
     {
-        if (Spawner.stepCount > positions.Count-1)
+        if (posIndex > positions.Count-1)
         {
             positions.Add(transform.position + (currVelocity * (float)(timeStep/AUtometer)));
         }
-        transform.position = positions[Spawner.stepCount];
+        transform.position = positions[posIndex];
         pos = transform.position;
         UnityEngine.Debug.Log(this.name + " Remove At: " + positions[0]);
         if (positions.Count >= 10) 
         {
             positions.RemoveAt(0);
-            Spawner.stepCount--;
+            posIndex--;
         }
     }
 }
