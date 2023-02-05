@@ -41,7 +41,7 @@ public class BodyScript : MonoBehaviour
 
         Renderer rend = bodyObj.GetComponent<Renderer> ();
         rend.material = new Material(Shader.Find("Standard"));
-        rend.material.SetColor("_Color", new Color(Random.Range(0.5f, 1.0f), Random.Range(0.8f, 1.0f), Random.Range(0.5f, 1.0f), 1));
+        rend.material.SetColor("_Color", new Color(Random.Range(0.5f, 1.0f), Random.Range(0.5f, 1.0f), Random.Range(0.5f, 1.0f), 1));
     }
 
     public void UpdateVelocity(BodyScript[] Bodies, float timeStep)
