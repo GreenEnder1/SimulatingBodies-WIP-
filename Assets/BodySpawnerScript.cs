@@ -12,7 +12,7 @@ public class BodySpawnerScript : MonoBehaviour
     public BodyScript[] bodies;
     private Quaternion initRotation;
     private float timer;
-    public float trigger;
+    private float trigger = 0.01f;
     public float timeStep;
     public int stepCount;
     private bool active = true;
@@ -22,6 +22,7 @@ public class BodySpawnerScript : MonoBehaviour
         initRotation = Quaternion.identity;
         body = bodyObj.GetComponent<BodyScript>();
         bodies = FindObjectsOfType<BodyScript>();
+        timeStep *= trigger;
     }
 
     // Update is called once per frame
