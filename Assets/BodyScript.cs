@@ -12,10 +12,11 @@ public class BodyScript : MonoBehaviour
     public Vector3 initVelocity;
     public Vector3 currVelocity;
     public LinkedList<Vector3> positions = new LinkedList<Vector3>();
+    public LinkedList<Vector3> recordedPositions = new LinkedList<Vector3>();
     public float distance; //Astronomical Units / 10 OR unity units
     public Vector3 accelerationDir;
     public Vector3 acceleration;
-    public Vector3 pos;
+    public Vector3 Initpos;
     private float gravitationalConstant;
     private float AUtometer;
     public int posIndex;
@@ -35,7 +36,7 @@ public class BodyScript : MonoBehaviour
         Rigidbody = GetComponent<Rigidbody>();
         currVelocity = initVelocity;
         transform.localScale *= radius;
-        pos = transform.position;
+        Initpos = transform.position;
         gravitationalConstant = 6.6743f * Mathf.Pow(10, -11);
         AUtometer = 1.496f * Mathf.Pow(10,10);
 
@@ -67,7 +68,19 @@ public class BodyScript : MonoBehaviour
             positions.AddLast(transform.position + (currVelocity * (float)(timeStep/AUtometer)));
         }
         transform.position = positions.Last.Value;
-        pos = transform.position;
         // UnityEngine.Debug.Log(this.name + " Remove At: " + positions.First);
+    }
+
+    public void RecordPosition()
+    {
+        recordedPositions.AddLast(positions.Last.Value);
+    }
+
+    public void ResetPosition()
+    {
+        transform.position = Initpos;
+        currVelocity = initVelocity;
+        posIndex = 0;
+        positions.clear();
     }
 }
