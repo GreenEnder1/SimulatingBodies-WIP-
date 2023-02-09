@@ -28,7 +28,26 @@ public class BodySpawnerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (timer > trigger && active == true)
+        if (stepCount*timeStep % 1000 == 0)
+        {
+            foreach (BodyScript updateBody in bodies)
+            {
+                updateBody.RecordPosition();
+            }
+        }
+        if (stepCount*timeStep >= Mathf.Pow(10, 7))
+        {
+            active = false;
+            foreach (BodyScript updateBody in bodies)
+            {
+                updateBody.ResetPosition();
+            }
+            timeStep /= 2;
+            stepCount = 0;
+            active = true;
+
+        }
+        if (active == true)
         {
             stepCount++;
             foreach (BodyScript updateBody in bodies)
@@ -39,7 +58,7 @@ public class BodySpawnerScript : MonoBehaviour
             {
                 updateBody.UpdatePosition(timeStep);
             }
-            timer = 0;
+            //timer = 0;
         }
         // if (Input.GetKeyDown(KeyCode.Space))
         // {
