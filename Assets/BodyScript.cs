@@ -12,7 +12,9 @@ public class BodyScript : MonoBehaviour
     public Vector3 initVelocity;
     public Vector3 currVelocity;
     public LinkedList<Vector3> positions = new LinkedList<Vector3>();
-    public LinkedList<Vector3> recordedPositions = new LinkedList<Vector3>();
+    public LinkedList<Vector3> currRecordedPositions = new LinkedList<Vector3>();
+    public LinkedList<Vector3> prevRecordedPositions = new LinkedList<Vector3>();
+    public LinkedList<float> percentDiff = new LinkedList<float>();
     public float distance; //Astronomical Units / 10 OR unity units
     public Vector3 accelerationDir;
     public Vector3 acceleration;
@@ -51,9 +53,9 @@ public class BodyScript : MonoBehaviour
         {
             if (otherBody != this)
             {
-                float distance = ((otherBody.pos - pos) * AUtometer).sqrMagnitude;
+                float distance = ((otherBody.transform.position - transform.position) * AUtometer).sqrMagnitude;
                 float accelerationMag = gravitationalConstant * otherBody.mass / distance;
-                currVelocity += (otherBody.pos - pos).normalized * accelerationMag * timeStep;
+                currVelocity += (otherBody.transform.position - transform.position).normalized * accelerationMag * timeStep;
                 // UnityEngine.Debug.Log("dist: " + distance);
                 // UnityEngine.Debug.Log("currVel: " + currVelocity);
             }
@@ -73,14 +75,31 @@ public class BodyScript : MonoBehaviour
 
     public void RecordPosition()
     {
-        recordedPositions.AddLast(positions.Last.Value);
+        currRecordedPositions.AddLast(positions.Last.Value);
+    }
+
+    public void CalculatePercentError()
+    {
+        if ((prevRecordedPositions.Count > 1) && (currRecordedPositions.Count > 1))
+        {
+            Vector3 recordedLast = currRecordedPositions.Last.Value;
+            Vector3 recorded2Last = prevRecordedPositions.Last.Value;
+            percentDiff.AddLast(((recordedLast - recorded2Last).magnitude/((recordedLast + recorded2Last).magnitude/(2))));
+            //UnityEngine.Debug.Log("Percentage Difference: " + percentDiff.Last.Value);
+        }
     }
 
     public void ResetPosition()
     {
+        prevRecordedPositions.Clear();
+        foreach(Vector3 recordedPosition in currRecordedPositions)
+        {
+            prevRecordedPositions.AddLast(recordedPosition);
+        }
+        currRecordedPositions.Clear();
         transform.position = Initpos;
         currVelocity = initVelocity;
         posIndex = 0;
-        positions.clear();
+        positions.Clear();
     }
 }

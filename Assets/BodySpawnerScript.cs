@@ -10,7 +10,8 @@ public class BodySpawnerScript : MonoBehaviour
     public GameObject bodyObj;
     private BodyScript body;
     public BodyScript[] bodies;
-    private Quaternion initRotation;
+    public LinkedList<float> currRecordedTimeStamps = new LinkedList<float>();
+    public LinkedList<float> prevRecordedTimeStamps = new LinkedList<float>();
     private float timer;
     private float trigger = 0.01f;
     public float timeStep;
@@ -19,7 +20,6 @@ public class BodySpawnerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        initRotation = Quaternion.identity;
         body = bodyObj.GetComponent<BodyScript>();
         bodies = FindObjectsOfType<BodyScript>();
         timeStep *= trigger;
@@ -34,6 +34,17 @@ public class BodySpawnerScript : MonoBehaviour
             {
                 updateBody.RecordPosition();
             }
+            currRecordedTimeStamps.AddLast(stepCount*timeStep);
+        }
+        if ((prevRecordedTimeStamps.Count > 0 && currRecordedTimeStamps.Count > 0))
+        {
+            if (prevRecordedTimeStamps.Find(currRecordedTimeStamps.Last.Value) != null)
+            {
+                foreach (BodyScript updateBody in bodies)
+                {
+                    updateBody.CalculatePercentError();
+                }
+            }
         }
         if (stepCount*timeStep >= Mathf.Pow(10, 7))
         {
@@ -45,6 +56,12 @@ public class BodySpawnerScript : MonoBehaviour
             timeStep /= 2;
             stepCount = 0;
             active = true;
+            prevRecordedTimeStamps.Clear();
+            foreach(float recordedTimeStamp in currRecordedTimeStamps)
+            {
+                prevRecordedTimeStamps.AddLast(recordedTimeStamp);
+            }
+            currRecordedTimeStamps.Clear();
 
         }
         if (active == true)
