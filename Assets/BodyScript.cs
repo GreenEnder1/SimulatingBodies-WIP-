@@ -9,12 +9,14 @@ public class BodyScript : MonoBehaviour
 {
     public float mass; // kg
     public float radius;
+    public string name;
     public Vector3 initVelocity;
     public Vector3 currVelocity;
     public LinkedList<Vector3> positions = new LinkedList<Vector3>();
     public LinkedList<Vector3> currRecordedPositions = new LinkedList<Vector3>();
     public LinkedList<Vector3> prevRecordedPositions = new LinkedList<Vector3>();
-    public LinkedList<float> percentDiff = new LinkedList<float>();
+    public LinkedList<float> distanceDiff = new LinkedList<float>();
+    private float prevAvgDistDiff = 0;
     public float distance; //Astronomical Units / 10 OR unity units
     public Vector3 accelerationDir;
     public Vector3 acceleration;
@@ -22,6 +24,8 @@ public class BodyScript : MonoBehaviour
     private float gravitationalConstant;
     private float AUtometer;
     public int posIndex;
+    public bool accurate = false;
+    public bool firstAccurate = false;
     
     public GameObject bodyObj;
     public GameObject spawnerObj;
@@ -36,6 +40,7 @@ public class BodyScript : MonoBehaviour
         Body = bodyObj.GetComponent<BodyScript>();
         Spawner = spawnerObj.GetComponent<BodySpawnerScript>();
         Rigidbody = GetComponent<Rigidbody>();
+        name = bodyObj.name;
         currVelocity = initVelocity;
         transform.localScale *= radius;
         Initpos = transform.position;
@@ -70,7 +75,7 @@ public class BodyScript : MonoBehaviour
             positions.AddLast(transform.position + (currVelocity * (float)(timeStep/AUtometer)));
         }
         transform.position = positions.Last.Value;
-        // UnityEngine.Debug.Log(this.name + " Remove At: " + positions.First);
+        //UnityEngine.Debug.Log(this.name + " Remove At: " + positions.First);
     }
 
     public void RecordPosition()
@@ -82,10 +87,8 @@ public class BodyScript : MonoBehaviour
     {
         if ((prevRecordedPositions.Count > 1) && (currRecordedPositions.Count > 1))
         {
-            Vector3 recordedLast = currRecordedPositions.Last.Value;
-            Vector3 recorded2Last = prevRecordedPositions.Last.Value;
-            percentDiff.AddLast(((recordedLast - recorded2Last).magnitude/((recordedLast + recorded2Last).magnitude/(2))));
-            //UnityEngine.Debug.Log("Percentage Difference: " + percentDiff.Last.Value);
+            distanceDiff.AddLast(Vector3.Distance(currRecordedPositions.Last.Value, prevRecordedPositions.Last.Value));
+            //UnityEngine.Debug.Log("Distance Difference: " + distanceDiff.Last.Value);
         }
     }
 
@@ -96,10 +99,35 @@ public class BodyScript : MonoBehaviour
         {
             prevRecordedPositions.AddLast(recordedPosition);
         }
+        float distSum = 0;
+        foreach (float distance in distanceDiff)
+        {
+            distSum += distance;
+        }
+        float avgDistDiff = distSum/distanceDiff.Count;
+        //UnityEngine.Debug.Log("avgDistDiff:" + avgDistDiff);
+        //UnityEngine.Debug.Log("distanceDiff Length:" + distanceDiff.Count);
+        //UnityEngine.Debug.Log("distanceSum: " + distSum);
+        if(avgDistDiff < prevAvgDistDiff + 0.01f && avgDistDiff > prevAvgDistDiff - 0.01f && !firstAccurate)
+        {
+            accurate = true;
+        }
+        prevAvgDistDiff = avgDistDiff;
         currRecordedPositions.Clear();
         transform.position = Initpos;
         currVelocity = initVelocity;
         posIndex = 0;
         positions.Clear();
+    }
+
+    public float GatherResults()
+    {
+        float distSum = 0;
+        foreach (float distance in distanceDiff)
+        {
+            distSum += distance;
+        }
+        float avgDistDiff = distSum/distanceDiff.Count;
+        return avgDistDiff;
     }
 }
