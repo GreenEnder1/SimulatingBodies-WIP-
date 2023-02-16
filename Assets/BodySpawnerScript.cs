@@ -32,31 +32,18 @@ public class BodySpawnerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if ((stepCount*timeStep % 1000) - (machineEpsilon * 8) <= 0 && active == true)
+        if ((prevRecordedTimeStamps.Count > 0 && currRecordedTimeStamps.Count > 0) && (prevRecordedTimeStamps.Find(currRecordedTimeStamps.Last.Value) != null))
         {
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.RecordPosition();
+                updateBody.MatchedTimestamp(true);
             }
-            currRecordedTimeStamps.AddLast(stepCount*timeStep);
         }
-        if ((prevRecordedTimeStamps.Count > 0 && currRecordedTimeStamps.Count > 0))
+        else
         {
-            if (prevRecordedTimeStamps.Find(currRecordedTimeStamps.Last.Value) != null)
+            foreach (BodyScript updateBody in bodies)
             {
-                int index = 0;
-                foreach (float timeStamps in prevRecordedTimeStamps)
-                {
-                    if (timeStamps.Equals(currRecordedTimeStamps.Last.Value))
-                    {
-                        break;
-                    }
-                    index++;
-                }
-                foreach (BodyScript updateBody in bodies)
-                {
-                    updateBody.CalculatePercentError(index);
-                }
+                updateBody.MatchedTimestamp(false);
             }
         }
         if (stepCount*timeStep >= Mathf.Pow(10, 7) && active == true)
@@ -65,35 +52,23 @@ public class BodySpawnerScript : MonoBehaviour
             foreach (BodyScript updateBody in bodies)
             {
                 updateBody.ResetPosition();
-                if(updateBody.accurate == true && updateBody.firstAccurate == false)
-                {
-                    accuracy++;
-                    UnityEngine.Debug.Log("Accurate: " + updateBody.name);
-                    updateBody.firstAccurate = true;
-                }
             }
-            if(accuracy >= bodies.Length)
+            timeStep /= 2;
+            stepCount = 0;
+            if (timeStep <= 50)
             {
-                foreach (BodyScript updateBody in bodies)
-                {
-                    results.AddLast(updateBody.GatherResults());
-                }
-                ExportResults();
-                active = false;
+                UnityEngine.Debug.Log("Completed");
             }
             else
             {
-                timeStep /= 2;
-                stepCount = 0;
                 active = true;
+                prevRecordedTimeStamps.Clear();
+                foreach(float recordedTimeStamp in currRecordedTimeStamps)
+                {
+                    prevRecordedTimeStamps.AddLast(recordedTimeStamp);
+                }
+                currRecordedTimeStamps.Clear();
             }
-            prevRecordedTimeStamps.Clear();
-            foreach(float recordedTimeStamp in currRecordedTimeStamps)
-            {
-                prevRecordedTimeStamps.AddLast(recordedTimeStamp);
-            }
-            currRecordedTimeStamps.Clear();
-
         }
         if (active == true)
         {
@@ -105,6 +80,11 @@ public class BodySpawnerScript : MonoBehaviour
             foreach (BodyScript updateBody in bodies)
             {
                 updateBody.UpdatePosition(timeStep);
+            }
+            currRecordedTimeStamps.AddLast(stepCount*timeStep);
+            foreach (BodyScript updateBody in bodies)
+            {
+                updateBody.RecordPosition();
             }
             //timer = 0;
         }
@@ -138,27 +118,26 @@ public class BodySpawnerScript : MonoBehaviour
         // }
         timer += Time.deltaTime;
     }
-
-    public void ExportResults()
-    {
-        string[][] distanceData = new string [bodies.Length+2][];
-        distanceData[0] = new string[] {"Timestep", "", "", ""};
-        distanceData[1] = new string[] {timeStep.ToString(), "", "", "Distance Difference"};
-        int index = 2;
-        LinkedListNode<float> bodyResult = results.First;
-        foreach (BodyScript updateBody in bodies)
-        {
-            distanceData[index] = new string[] {"", "", updateBody.name, bodyResult.Value.ToString()};
-            UnityEngine.Debug.Log("Distance Data: " + distanceData[index][2] + " Distance Diff - " + distanceData[index][3]);
-            index++;
-            bodyResult = bodyResult.Next;
-        }
-        using (StreamWriter writer = new StreamWriter("data.csv"))
-        {
-            foreach (string[] row in distanceData)
-            {
-                writer.WriteLine(string.Join(",", row));
-            }
-        }
-    }
+    // public void ExportResults()
+    // {
+    //     string[][] distanceData = new string [bodies.Length+2][];
+    //     distanceData[0] = new string[] {"Timestep", "", "", ""};
+    //     distanceData[1] = new string[] {timeStep.ToString(), "", "", "Distance Difference"};
+    //     int index = 2;
+    //     LinkedListNode<float> bodyResult = results.First;
+    //     foreach (BodyScript updateBody in bodies)
+    //     {
+    //         distanceData[index] = new string[] {"", "", updateBody.name, bodyResult.Value.ToString()};
+    //         UnityEngine.Debug.Log("Distance Data: " + distanceData[index][2] + " Distance Diff - " + distanceData[index][3]);
+    //         index++;
+    //         bodyResult = bodyResult.Next;
+    //     }
+    //     using (StreamWriter writer = new StreamWriter("data.csv"))
+    //     {
+    //         foreach (string[] row in distanceData)
+    //         {
+    //             writer.WriteLine(string.Join(",", row));
+    //         }
+    //     }
+    // }
 }

@@ -14,8 +14,7 @@ public class BodyScript : MonoBehaviour
     public Vector3 currVelocity;
     public LinkedList<Vector3> positions = new LinkedList<Vector3>();
     public LinkedList<Vector3> currRecordedPositions = new LinkedList<Vector3>();
-    public LinkedList<Vector3> prevRecordedPositions = new LinkedList<Vector3>();
-    public LinkedList<float> distanceDiff = new LinkedList<float>();
+    public LinkedList<bool> matched = new LinkedList<bool>();
     private float prevAvgDistDiff = 0;
     public float distance; //Astronomical Units / 10 OR unity units
     public Vector3 accelerationDir;
@@ -83,22 +82,13 @@ public class BodyScript : MonoBehaviour
         currRecordedPositions.AddLast(positions.Last.Value);
     }
 
-    public void CalculatePercentError(int previousIndex)
+    public void MatchedTimestamp(bool value)
     {
-        if ((prevRecordedPositions.Count > 1) && (currRecordedPositions.Count > 1))
-        {
-            distanceDiff.AddLast(Vector3.Distance(currRecordedPositions.Last.Value, prevRecordedPositions.ElementAt(previousIndex)));
-            //UnityEngine.Debug.Log("Distance Difference: " + distanceDiff.Last.Value);
-        }
+        matched.AddLast(value);
     }
 
     public void ResetPosition()
     {
-        prevRecordedPositions.Clear();
-        foreach(Vector3 recordedPosition in currRecordedPositions)
-        {
-            prevRecordedPositions.AddLast(recordedPosition);
-        }
         float distSum = 0;
         foreach (float distance in distanceDiff)
         {
@@ -120,14 +110,14 @@ public class BodyScript : MonoBehaviour
         positions.Clear();
     }
 
-    public float GatherResults()
+    public float GatherResults(float elapsedTime)
     {
-        float distSum = 0;
-        foreach (float distance in distanceDiff)
+        string[][] rawData = new string[currRecordedPositions.Count+1][5];
+        int index = 1;
+        rawData[0] = new string[] {""};
+        foreach(Vector3 position in currRecordedPositions)
         {
-            distSum += distance;
+            rawData[index] = new string[] {elapsedTime.ToString(), position.x.ToString(), position.y.ToString(), position.z.ToString(), matched.ElementAt(index-1).Value.toString()};
         }
-        float avgDistDiff = distSum/distanceDiff.Count;
-        return avgDistDiff;
     }
 }
