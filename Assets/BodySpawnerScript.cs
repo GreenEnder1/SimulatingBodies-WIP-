@@ -21,6 +21,7 @@ public class BodySpawnerScript : MonoBehaviour
     public int stepCount;
     private bool active = true;
     private int accuracy = 0;
+    private double machineEpsilon = 1.11022302462516E-16;
     // Start is called before the first frame update
     void Start()
     {
@@ -31,7 +32,7 @@ public class BodySpawnerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (stepCount*timeStep % 1000 == 0 && active == true)
+        if ((stepCount*timeStep % 1000) - (machineEpsilon * 8) <= 0 && active == true)
         {
             foreach (BodyScript updateBody in bodies)
             {
@@ -43,9 +44,18 @@ public class BodySpawnerScript : MonoBehaviour
         {
             if (prevRecordedTimeStamps.Find(currRecordedTimeStamps.Last.Value) != null)
             {
+                int index = 0;
+                foreach (float timeStamps in prevRecordedTimeStamps)
+                {
+                    if (timeStamps.Equals(currRecordedTimeStamps.Last.Value))
+                    {
+                        break;
+                    }
+                    index++;
+                }
                 foreach (BodyScript updateBody in bodies)
                 {
-                    updateBody.CalculatePercentError();
+                    updateBody.CalculatePercentError(index);
                 }
             }
         }
@@ -132,7 +142,7 @@ public class BodySpawnerScript : MonoBehaviour
     public void ExportResults()
     {
         string[][] distanceData = new string [bodies.Length+2][];
-        distanceData[0] = new string[] {"Stable Timestep", "", "", ""};
+        distanceData[0] = new string[] {"Timestep", "", "", ""};
         distanceData[1] = new string[] {timeStep.ToString(), "", "", "Distance Difference"};
         int index = 2;
         LinkedListNode<float> bodyResult = results.First;

@@ -83,11 +83,11 @@ public class BodyScript : MonoBehaviour
         currRecordedPositions.AddLast(positions.Last.Value);
     }
 
-    public void CalculatePercentError()
+    public void CalculatePercentError(int previousIndex)
     {
         if ((prevRecordedPositions.Count > 1) && (currRecordedPositions.Count > 1))
         {
-            distanceDiff.AddLast(Vector3.Distance(currRecordedPositions.Last.Value, prevRecordedPositions.Last.Value));
+            distanceDiff.AddLast(Vector3.Distance(currRecordedPositions.Last.Value, prevRecordedPositions.ElementAt(previousIndex)));
             //UnityEngine.Debug.Log("Distance Difference: " + distanceDiff.Last.Value);
         }
     }
