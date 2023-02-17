@@ -33,31 +33,37 @@ public class BodySpawnerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if ((stepCount*timeStep % 1000) - (machineEpsilon * 8) <= 0 && active == true)
+        if (prevRecordedTimeStamps.Count > 0 && currRecordedTimeStamps.Count > 0)
+        {
+            bool matchedTimeStamp = false;
+            foreach (float value in prevRecordedTimeStamps)
+            {
+                if (value == currRecordedTimeStamps.Last.Value)
+                {
+                    matchedTimeStamp = true;
+                    break;
+                }
+            }
+            if (matchedTimeStamp)
+            {
+                foreach (BodyScript updateBody in bodies)
+                {
+                    updateBody.MatchedTimestamp(true);
+                }
+            }
+            else
+            {
+                foreach (BodyScript updateBody in bodies)
+                {
+                    updateBody.MatchedTimestamp(false);
+                }
+            }
+        }
+        else
         {
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.RecordPosition();
-            }
-            currRecordedTimeStamps.AddLast(stepCount*timeStep);
-        }
-        if ((prevRecordedTimeStamps.Count > 0 && currRecordedTimeStamps.Count > 0))
-        {
-            if (prevRecordedTimeStamps.Find(currRecordedTimeStamps.Last.Value) != null)
-            {
-                int index = 0;
-                foreach (float timeStamps in prevRecordedTimeStamps)
-                {
-                    if (timeStamps.Equals(currRecordedTimeStamps.Last.Value))
-                    {
-                        break;
-                    }
-                    index++;
-                }
-                foreach (BodyScript updateBody in bodies)
-                {
-                    updateBody.CalculatePercentError(index);
-                }
+                updateBody.MatchedTimestamp(false);
             }
         }
         if (stepCount*timeStep >= Mathf.Pow(10, 7) && active == true)
@@ -81,7 +87,7 @@ public class BodySpawnerScript : MonoBehaviour
             }
             else
             {
-                timeStep /= 2;
+                timeStep = (timeStep/2) - (float)(machineEpsilon * 8);
                 stepCount = 0;
                 active = true;
             }
@@ -104,6 +110,11 @@ public class BodySpawnerScript : MonoBehaviour
             {
                 updateBody.UpdatePosition(timeStep);
             }
+            foreach (BodyScript updateBody in bodies)
+            {
+                updateBody.RecordPosition();
+            }
+            currRecordedTimeStamps.AddLast(stepCount*timeStep);
             //timer = 0;
         }
         // if (Input.GetKeyDown(KeyCode.Space))
