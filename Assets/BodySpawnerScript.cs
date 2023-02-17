@@ -14,6 +14,7 @@ public class BodySpawnerScript : MonoBehaviour
     public BodyScript[] bodies;
     public LinkedList<float> currRecordedTimeStamps = new LinkedList<float>();
     public LinkedList<float> prevRecordedTimeStamps = new LinkedList<float>();
+    public LinkedList<float> timeSteps = new LinkedList<float>();
     public LinkedList<float> results = new LinkedList<float>();
     private float timer;
     private float trigger = 0.01f;
@@ -72,12 +73,9 @@ public class BodySpawnerScript : MonoBehaviour
                     updateBody.firstAccurate = true;
                 }
             }
+            timeSteps.AddLast(timeStep);
             if(accuracy >= bodies.Length)
             {
-                foreach (BodyScript updateBody in bodies)
-                {
-                    results.AddLast(updateBody.GatherResults());
-                }
                 ExportResults();
                 active = false;
             }
@@ -141,18 +139,15 @@ public class BodySpawnerScript : MonoBehaviour
 
     public void ExportResults()
     {
-        string[][] distanceData = new string [bodies.Length+2][];
-        distanceData[0] = new string[] {"Timestep", "", "", ""};
-        distanceData[1] = new string[] {timeStep.ToString(), "", "", "Distance Difference"};
-        int index = 2;
-        LinkedListNode<float> bodyResult = results.First;
-        foreach (BodyScript updateBody in bodies)
+        string[][] distanceData = new string[timeSteps.Count+1][];
+        string[] titles = new string[bodies.Length + 1];
+        titles[0] = "Timestep";
+        for(int i = 1; i <= bodies.Length; i++)
         {
-            distanceData[index] = new string[] {"", "", updateBody.name, bodyResult.Value.ToString()};
-            UnityEngine.Debug.Log("Distance Data: " + distanceData[index][2] + " Distance Diff - " + distanceData[index][3]);
-            index++;
-            bodyResult = bodyResult.Next;
+            titles[i] = bodies[i].name;
         }
+        distanceData[0] = titles;
+
         using (StreamWriter writer = new StreamWriter("data.csv"))
         {
             foreach (string[] row in distanceData)

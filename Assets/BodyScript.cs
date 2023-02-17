@@ -16,6 +16,7 @@ public class BodyScript : MonoBehaviour
     public LinkedList<Vector3> currRecordedPositions = new LinkedList<Vector3>();
     public LinkedList<Vector3> prevRecordedPositions = new LinkedList<Vector3>();
     public LinkedList<float> distanceDiff = new LinkedList<float>();
+    public LinkedList<float> avgDistanceDiffs = new LinkedList<float>();
     private float prevAvgDistDiff = 0;
     public float distance; //Astronomical Units / 10 OR unity units
     public Vector3 accelerationDir;
@@ -105,6 +106,7 @@ public class BodyScript : MonoBehaviour
             distSum += distance;
         }
         float avgDistDiff = distSum/distanceDiff.Count;
+        avgDistanceDiffs.AddLast(avgDistDiff);
         //UnityEngine.Debug.Log("avgDistDiff:" + avgDistDiff);
         //UnityEngine.Debug.Log("distanceDiff Length:" + distanceDiff.Count);
         //UnityEngine.Debug.Log("distanceSum: " + distSum);
@@ -120,14 +122,8 @@ public class BodyScript : MonoBehaviour
         positions.Clear();
     }
 
-    public float GatherResults()
+    public LinkedList<float> GatherResults()
     {
-        float distSum = 0;
-        foreach (float distance in distanceDiff)
-        {
-            distSum += distance;
-        }
-        float avgDistDiff = distSum/distanceDiff.Count;
-        return avgDistDiff;
+        return avgDistanceDiffs;
     }
 }
