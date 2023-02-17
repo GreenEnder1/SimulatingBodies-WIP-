@@ -153,13 +153,13 @@ public class BodySpawnerScript : MonoBehaviour
             titles[i] = bodies[i-1].name;
         }
         distanceData[0] = titles;
-        for (int i = 0; i < timeSteps.Count; i++)
+        for (int i = 1; i <= timeSteps.Count; i++)
         {
             string[] simRun = new string[bodies.Length + 1];
-            simRun[0] = timeSteps.ElementAt(i).ToString();
+            simRun[0] = timeSteps.ElementAt(i-1).ToString();
             for(int j = 1; j <= bodies.Length; j++)
             {
-                simRun[j] = bodies[j-1].avgDistanceDiffs.ElementAt(i).ToString();
+                simRun[j] = bodies[j-1].avgDistanceDiffs.ElementAt(i-1).ToString();
             }
             distanceData[i] = simRun;
         }
