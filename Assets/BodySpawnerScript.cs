@@ -20,7 +20,6 @@ public class BodySpawnerScript : MonoBehaviour
     public float timeStep;
     public int stepCount;
     private bool active = true;
-    private int accuracy = 0;
     private double machineEpsilon = 1.11022302462516E-16;
     // Start is called before the first frame update
     void Start()
@@ -53,7 +52,7 @@ public class BodySpawnerScript : MonoBehaviour
             {
                 updateBody.ResetPosition();
             }
-            timeStep /= 2;
+            timeStep = (timeStep/2) - (float)(machineEpsilon * 8);
             stepCount = 0;
             if (timeStep <= 50)
             {

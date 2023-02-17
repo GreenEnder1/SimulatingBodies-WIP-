@@ -14,8 +14,8 @@ public class BodyScript : MonoBehaviour
     public Vector3 currVelocity;
     public LinkedList<Vector3> positions = new LinkedList<Vector3>();
     public LinkedList<Vector3> currRecordedPositions = new LinkedList<Vector3>();
+    public LinkedList<Vector3> prevRecordedPositions = new LinkedList<Vector3>();
     public LinkedList<bool> matched = new LinkedList<bool>();
-    private float prevAvgDistDiff = 0;
     public float distance; //Astronomical Units / 10 OR unity units
     public Vector3 accelerationDir;
     public Vector3 acceleration;
@@ -89,20 +89,11 @@ public class BodyScript : MonoBehaviour
 
     public void ResetPosition()
     {
-        float distSum = 0;
-        foreach (float distance in distanceDiff)
+        prevRecordedPositions.Clear();
+        foreach(Vector3 recordedPosition in currRecordedPositions)
         {
-            distSum += distance;
+            prevRecordedPositions.AddLast(recordedPosition);
         }
-        float avgDistDiff = distSum/distanceDiff.Count;
-        //UnityEngine.Debug.Log("avgDistDiff:" + avgDistDiff);
-        //UnityEngine.Debug.Log("distanceDiff Length:" + distanceDiff.Count);
-        //UnityEngine.Debug.Log("distanceSum: " + distSum);
-        if(avgDistDiff < prevAvgDistDiff + 0.01f && avgDistDiff > prevAvgDistDiff - 0.01f && !firstAccurate)
-        {
-            accurate = true;
-        }
-        prevAvgDistDiff = avgDistDiff;
         currRecordedPositions.Clear();
         transform.position = Initpos;
         currVelocity = initVelocity;
@@ -110,14 +101,21 @@ public class BodyScript : MonoBehaviour
         positions.Clear();
     }
 
-    public float GatherResults(float elapsedTime)
+    public void GatherResults(LinkedList<float> timeStamps)
     {
-        string[][] rawData = new string[currRecordedPositions.Count+1][5];
-        int index = 1;
-        rawData[0] = new string[] {""};
-        foreach(Vector3 position in currRecordedPositions)
+        string[][] rawData = new string[currRecordedPositions.Count+1][];
+        int Listindex = 0;
+        int arrayIndex = 1;
+        rawData[0] = new string[] {"Elapsed Time", "Previous X Position", "Previous Y Position" , "Previous Z Position" , "Current X Position" , "Current Y Position" , "Current Z Position" , "Matching Timestep"};
+        while (Listindex != currRecordedPositions.Count)
         {
-            rawData[index] = new string[] {elapsedTime.ToString(), position.x.ToString(), position.y.ToString(), position.z.ToString(), matched.ElementAt(index-1).Value.toString()};
+            if (matched.ElementAt(Listindex))
+            {
+                Vector3 matchedCurrent = currRecordedPositions.ElementAt(Listindex);
+                Vector3 matchedPrevious = prevRecordedPositions.Find(matchedCurrent).Value;
+                rawData[arrayIndex] = new string[] {timeStamps.ElementAt(Listindex).ToString(), matchedPrevious.x.ToString(), matchedPrevious.y.ToString(), matchedCurrent.z.ToString(), matchedCurrent.x.ToString(), matchedCurrent.y.ToString(), matchedCurrent.z.ToString(), matched.ElementAt(Listindex).ToString()};
+                arrayIndex++;
+            }
         }
     }
 }
