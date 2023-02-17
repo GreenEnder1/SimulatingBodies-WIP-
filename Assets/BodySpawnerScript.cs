@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public class BodySpawnerScript : MonoBehaviour
@@ -17,7 +18,6 @@ public class BodySpawnerScript : MonoBehaviour
     public LinkedList<float> timeSteps = new LinkedList<float>();
     public LinkedList<float> results = new LinkedList<float>();
     private float timer;
-    private float trigger = 0.01f;
     public float timeStep;
     public int stepCount;
     private bool active = true;
@@ -46,24 +46,19 @@ public class BodySpawnerScript : MonoBehaviour
             }
             if (matchedTimeStamp)
             {
+                int index = 0;
+                foreach (float timeStamps in prevRecordedTimeStamps)
+                {
+                    if (timeStamps.Equals(currRecordedTimeStamps.Last.Value))
+                    {
+                        break;
+                    }
+                    index++;
+                }
                 foreach (BodyScript updateBody in bodies)
                 {
-                    updateBody.MatchedTimestamp(true);
+                    updateBody.CalculatePercentError(index);
                 }
-            }
-            else
-            {
-                foreach (BodyScript updateBody in bodies)
-                {
-                    updateBody.MatchedTimestamp(false);
-                }
-            }
-        }
-        else
-        {
-            foreach (BodyScript updateBody in bodies)
-            {
-                updateBody.MatchedTimestamp(false);
             }
         }
         if (stepCount*timeStep >= Mathf.Pow(10, 7) && active == true)
@@ -155,10 +150,19 @@ public class BodySpawnerScript : MonoBehaviour
         titles[0] = "Timestep";
         for(int i = 1; i <= bodies.Length; i++)
         {
-            titles[i] = bodies[i].name;
+            titles[i] = bodies[i-1].name;
         }
         distanceData[0] = titles;
-
+        for (int i = 0; i < timeSteps.Count; i++)
+        {
+            string[] simRun = new string[bodies.Length + 1];
+            simRun[0] = timeSteps.ElementAt(i).ToString();
+            for(int j = 1; j <= bodies.Length; j++)
+            {
+                simRun[j] = bodies[j-1].avgDistanceDiffs.ElementAt(i).ToString();
+            }
+            distanceData[i] = simRun;
+        }
         using (StreamWriter writer = new StreamWriter("data.csv"))
         {
             foreach (string[] row in distanceData)

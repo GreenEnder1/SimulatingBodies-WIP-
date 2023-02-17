@@ -121,9 +121,4 @@ public class BodyScript : MonoBehaviour
         posIndex = 0;
         positions.Clear();
     }
-
-    public LinkedList<float> GatherResults()
-    {
-        return avgDistanceDiffs;
-    }
 }
