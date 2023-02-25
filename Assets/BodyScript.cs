@@ -76,7 +76,7 @@ public class BodyScript : MonoBehaviour
     Vector3[] RK4(Vector3[] y, float dt, Vector3 a)
     {
 
-        Func<float, Vector3[], Vector3[]> f = (Vector3[] y) =>
+        Vector3[] f(Vector3[] y)
         {
             Vector3[] dydt = new Vector3[2];
             dydt[0] = y[1];
