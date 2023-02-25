@@ -52,7 +52,10 @@ public class BodyScript : MonoBehaviour
             {
                 float distance = ((otherBody.pos - pos) * AUtometer).sqrMagnitude;
                 float accelerationMag = gravitationalConstant * otherBody.mass / distance;
-                currVelocity += (otherBody.pos - pos).normalized * accelerationMag * timeStep;
+                Vector3[] y = {pos, currVelocity };
+                Vector3[] dy = RK4(y, timeStep, acceleration);
+                transform.position = y[0] + dy[0];
+                currVelocity = y[1] + dy[1];
                 // UnityEngine.Debug.Log("dist: " + distance);
                 // UnityEngine.Debug.Log("currVel: " + currVelocity);
             }
@@ -64,10 +67,51 @@ public class BodyScript : MonoBehaviour
         posIndex++;
         if (posIndex > positions.Count-1)
         {
-            positions.AddLast(transform.position + (currVelocity * (float)(timeStep/AUtometer)));
+            positions.AddLast(transform.position);
         }
-        transform.position = positions.Last.Value;
         pos = transform.position;
         // UnityEngine.Debug.Log(this.name + " Remove At: " + positions.First);
+    }
+
+    Vector3[] RK4(Vector3[] y, float dt, Vector3 a)
+    {
+
+        Func<float, Vector3[], Vector3[]> f = (Vector3[] y) =>
+        {
+            Vector3[] dydt = new Vector3[2];
+            dydt[0] = y[1];
+            dydt[1] = a;
+            return dydt;
+        };
+
+
+        Vector3[] k1 = f(y);
+        Vector3[] k2 = f(AddArrays(y, MultiplyArray(k1, dt / 2)));
+        Vector3[] k3 = f(AddArrays(y, MultiplyArray(k2, dt / 2)));
+        Vector3[] k4 = f(AddArrays(y, MultiplyArray(k3, dt)));
+
+        Vector3[] dy = MultiplyArray(AddArrays(AddArrays(k1, MultiplyArray(k2, 2)), AddArrays(MultiplyArray(k3, 2), k4)), dt / 6);
+
+        return dy;
+    }
+
+    Vector3[] AddArrays(Vector3[] a, Vector3[] b)
+    {
+        Vector3[] result = new Vector3[a.Length];
+        for (int i = 0; i < a.Length; i++)
+        {
+            result[i] = a[i] + b[i];
+        }
+        return result;
+    }
+
+    Vector3[] MultiplyArray(Vector3[] a, float b)
+    {
+        Vector3[] result = new Vector3[a.Length];
+        for (int i = 0; i < a.Length; i++)
+        {
+            result[i] = a[i] * b;
+        }
+        return result;
     }
 }
