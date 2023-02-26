@@ -32,8 +32,8 @@ public class BodySpawnerScript : MonoBehaviour
             stepCount++;
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.UpdateVelocity(bodies, timeStep);
-            };
+                updateBody.UpdateVelocity(timeStep);
+            }
             foreach (BodyScript updateBody in bodies)
             {
                 updateBody.UpdatePosition(timeStep);
