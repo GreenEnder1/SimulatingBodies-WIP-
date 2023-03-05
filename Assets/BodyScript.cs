@@ -49,7 +49,7 @@ public class BodyScript : MonoBehaviour
 
     public Vector3 UpdateVelocity(float timeStep)
     {
-        currVelocity += RK4(pos, timeStep, CalculateAcceleration);
+        currVelocity += RK4(pos, timeStep) * timeStep;
         return currVelocity;
 
     }
@@ -59,39 +59,44 @@ public class BodyScript : MonoBehaviour
         posIndex++;
         if (posIndex > positions.Count-1)
         {
-            positions.AddLast(transform.position + currVelocity*timeStep);
+            positions.AddLast(transform.position + currVelocity*(timeStep/AUtometer));
         }
         transform.position = positions.Last.Value;
         pos = transform.position;
         // UnityEngine.Debug.Log(this.name + " Remove At: " + positions.First);
     }
 
-    Vector3 RK4(Vector3 y, float dt, Func<Vector3, Vector3> f)
+    Vector3 RK4(Vector3 y, float dt)
     {
-        Vector3 k1 = f(y);
-        Vector3 k2 = f(y + (k1*dt/2));
-        Vector3 k3 = f(y + (k2*dt/2));
-        Vector3 k4 = f(y + (k3*dt));
-
-        Vector3 dy = y + (dt/6)*(k1 + 2*k2 + 2*k3 + k4);
-        UnityEngine.Debug.LogFormat("pos dy: {0} vel dy: {1}", dy[0], dy[1]);
-        return dy;
-    }
-
-    private Vector3 CalculateAcceleration(Vector3 y)
-    {
-        Vector3 dydt = Vector3.zero;
+        Vector3 acceleration = Vector3.zero;
         foreach (BodyScript otherBody in Bodies)
         {
             if (otherBody != this)
             {
                 float distance = ((otherBody.pos - y) * AUtometer).sqrMagnitude;
-                Vector3 acceleration = (otherBody.pos - y).normalized * (gravitationalConstant * otherBody.mass / distance);
-                dydt += acceleration;
-                // UnityEngine.Debug.Log("dist: " + distance);
-                // UnityEngine.Debug.Log("currVel: " + currVelocity);
+                float accelerationMag = (gravitationalConstant * otherBody.mass / distance);
+                Vector3 k1 = (otherBody.pos - y) * accelerationMag;
+
+                Vector3 tempVel = partialStep(currVelocity, k1, 0.5f);
+                Vector3 tempPos = partialStep(pos, tempVel, 0.5f);
+
+                Vector3 k2 = (tempPos - (tempPos+(tempVel*0.5f*dt))) * accelerationMag;
+
+                tempVel = partialStep(currVelocity, k2, 0.5f);
+
+                Vector3 k3 = (tempPos - (tempPos+(tempVel*0.5f*dt))) * accelerationMag;
+
+                tempVel = partialStep(currVelocity, k3, 1);
+                tempPos = partialStep(pos, tempVel, 0.5f);
+
+                Vector3 k4 = (otherBody.pos - (tempPos+(tempVel*0.5f*dt))) * accelerationMag;
+                acceleration += (k1 + (2*k2) + (2*k3) + k4)/6;
             }
         };
-        return dydt;
+        return acceleration;
+    }
+    Vector3 partialStep(Vector3 p1, Vector3 p2, float dt)
+    {
+        return (p1 + (p2*dt));
     }
 }
