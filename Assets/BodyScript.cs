@@ -17,6 +17,14 @@ public class BodyScript : MonoBehaviour
     public Vector3 accelerationDir;
     public Vector3 acceleration;
     public Vector3 pos;
+    public Vector3 k1;
+    public Vector3 k2;
+    public Vector3 k3;
+    public Vector3 k4;
+    private Vector3 k1Acc;
+    private Vector3 k2Acc;
+    private Vector3 k3Acc;
+    private Vector3 k4Acc;
     private float gravitationalConstant;
     private float AUtometer;
     public int posIndex;
@@ -47,25 +55,56 @@ public class BodyScript : MonoBehaviour
         rend.material.SetColor("_Color", new Color(UnityEngine.Random.Range(0.5f, 1.0f), UnityEngine.Random.Range(0.5f, 1.0f), UnityEngine.Random.Range(0.5f, 1.0f), 1));
     }
 
-    public Vector3 UpdateVelocity(float timeStep)
-    {
-        currVelocity += RK4(pos, timeStep) * timeStep;
-        return currVelocity;
-
-    }
-
     public void UpdatePosition(float timeStep)
     {
         posIndex++;
+        k3Acc = calculateAcceleration();
+        pos = k4;
+        k4Acc = calculateAcceleration();
+        pos = k1 + (timeStep/AUtometer)*currVelocity + timeStep*timeStep*(k1Acc + k2Acc + k3Acc)/(6*AUtometer);
+        currVelocity += (timeStep/6)*(k1Acc + (2*k2Acc) + (2*k3Acc) + k4Acc);
         if (posIndex > positions.Count-1)
         {
-            positions.AddLast(transform.position + currVelocity*(timeStep/AUtometer));
+            positions.AddLast(pos);
         }
         transform.position = positions.Last.Value;
-        pos = transform.position;
         // UnityEngine.Debug.Log(this.name + " Remove At: " + positions.First);
     }
 
+    public Vector3 Calculatek2 (float timeStep)
+    {
+        k1 = pos;
+        k2 = pos + 0.5f*(timeStep/AUtometer)*currVelocity;
+        return k2;
+    }
+    public Vector3 Calculatek3(float timeStep)
+    {
+        k1Acc = calculateAcceleration();
+        k3 = pos + 0.5f*(timeStep/AUtometer)*(currVelocity + 0.5f*timeStep*k1Acc);
+        return k3;
+    }
+
+    public Vector3 Calculatek4(float timeStep)
+    {
+        k2Acc = calculateAcceleration();
+        k4 = pos + (timeStep/AUtometer)*(currVelocity + 0.5f*timeStep*k2Acc);
+        return k4;
+    }
+
+    Vector3 calculateAcceleration()
+    {
+        Vector3 acceleration = Vector3.zero;
+        foreach (BodyScript otherBody in Bodies)
+        {
+            if (otherBody != this)
+            {
+                float distance = ((otherBody.pos - pos) * AUtometer).sqrMagnitude;
+                float accelerationMag = (gravitationalConstant * otherBody.mass / distance);
+                acceleration += (otherBody.pos - pos).normalized * accelerationMag;
+            }
+        }
+        return acceleration;
+    }
     Vector3 RK4(Vector3 y, float dt)
     {
         Vector3 acceleration = Vector3.zero;
