@@ -34,9 +34,6 @@ public class BodySpawnerScript : MonoBehaviour
             {
                 updateBody.Calculatek2(timeStep);
                 updateBody.Calculatek3(timeStep);
-            }
-            foreach (BodyScript updateBody in bodies)
-            {
                 updateBody.Calculatek4(timeStep);
             }
             foreach (BodyScript updateBody in bodies)
