@@ -72,7 +72,7 @@ public class BodySpawnerScript : MonoBehaviour
         //         updateBody.UpdatePosition(timeStep);
         //     }
         //     timer = 0;
-        // }
+        //  }
         timer += Time.deltaTime;
     }
 }
