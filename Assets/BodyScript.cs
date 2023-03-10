@@ -66,7 +66,7 @@ public class BodyScript : MonoBehaviour
         {
             positions.AddLast(pos);
         }
-        transform.position = positions.Last.Value;
+        transform.position = pos;
         // UnityEngine.Debug.Log(this.name + " Remove At: " + positions.First);
     }
 
