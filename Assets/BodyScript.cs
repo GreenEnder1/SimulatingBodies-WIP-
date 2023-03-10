@@ -58,7 +58,8 @@ public class BodyScript : MonoBehaviour
     public void UpdatePosition(float timeStep)
     {
         posIndex++;
-        k4Acc = calculateAcceleration();
+        k3Acc = calculateAcceleration(k3);
+        k4Acc = calculateAcceleration(k4);
         pos = k1 + (timeStep/AUtometer)*currVelocity + timeStep*timeStep*(k1Acc + k2Acc + k3Acc)/(6*AUtometer);
         currVelocity += (timeStep/6)*(k1Acc + (2*k2Acc) + (2*k3Acc) + k4Acc);
         if (posIndex > positions.Count-1)
@@ -77,28 +78,28 @@ public class BodyScript : MonoBehaviour
     }
     public Vector3 Calculatek3(float timeStep)
     {
-        k1Acc = calculateAcceleration();
+        k1Acc = calculateAcceleration(k1);
         k3 = pos + 0.5f*(timeStep/AUtometer)*(currVelocity + 0.5f*timeStep*k1Acc);
         return k3;
     }
 
     public Vector3 Calculatek4(float timeStep)
     {
-        k2Acc = calculateAcceleration();
+        k2Acc = calculateAcceleration(k2);
         k4 = pos + (timeStep/AUtometer)*(currVelocity + 0.5f*timeStep*k2Acc);
         return k4;
     }
 
-    public Vector3 calculateAcceleration()
+    public Vector3 calculateAcceleration(Vector3 y)
     {
         Vector3 acceleration = Vector3.zero;
         foreach (BodyScript otherBody in Bodies)
         {
             if (otherBody != this)
             {
-                float distance = ((otherBody.pos - pos) * AUtometer).sqrMagnitude;
+                float distance = ((otherBody.pos - y) * AUtometer).sqrMagnitude;
                 float accelerationMag = (gravitationalConstant * otherBody.mass / distance);
-                acceleration += (otherBody.pos - pos).normalized * accelerationMag;
+                acceleration += (otherBody.pos - y).normalized * accelerationMag;
             }
         }
         return acceleration;

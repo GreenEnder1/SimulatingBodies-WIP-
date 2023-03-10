@@ -37,17 +37,7 @@ public class BodySpawnerScript : MonoBehaviour
             }
             foreach (BodyScript updateBody in bodies)
             {
-                updateBody.pos = updateBody.k2;
-            }
-            foreach (BodyScript updateBody in bodies)
-            {
                 updateBody.Calculatek4(timeStep);
-            }
-            foreach (BodyScript updateBody in bodies)
-            {
-                updateBody.pos = updateBody.k3;
-                updateBody.k3Acc = updateBody.calculateAcceleration();
-                updateBody.pos = updateBody.k4;
             }
             foreach (BodyScript updateBody in bodies)
             {
