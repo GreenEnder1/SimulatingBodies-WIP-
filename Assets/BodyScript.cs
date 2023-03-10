@@ -21,10 +21,10 @@ public class BodyScript : MonoBehaviour
     public Vector3 k2;
     public Vector3 k3;
     public Vector3 k4;
-    private Vector3 k1Acc;
-    private Vector3 k2Acc;
-    private Vector3 k3Acc;
-    private Vector3 k4Acc;
+    public Vector3 k1Acc;
+    public Vector3 k2Acc;
+    public Vector3 k3Acc;
+    public Vector3 k4Acc;
     private float gravitationalConstant;
     private float AUtometer;
     public int posIndex;
@@ -58,8 +58,6 @@ public class BodyScript : MonoBehaviour
     public void UpdatePosition(float timeStep)
     {
         posIndex++;
-        k3Acc = calculateAcceleration();
-        pos = k4;
         k4Acc = calculateAcceleration();
         pos = k1 + (timeStep/AUtometer)*currVelocity + timeStep*timeStep*(k1Acc + k2Acc + k3Acc)/(6*AUtometer);
         currVelocity += (timeStep/6)*(k1Acc + (2*k2Acc) + (2*k3Acc) + k4Acc);
@@ -91,7 +89,7 @@ public class BodyScript : MonoBehaviour
         return k4;
     }
 
-    Vector3 calculateAcceleration()
+    public Vector3 calculateAcceleration()
     {
         Vector3 acceleration = Vector3.zero;
         foreach (BodyScript otherBody in Bodies)
@@ -104,38 +102,5 @@ public class BodyScript : MonoBehaviour
             }
         }
         return acceleration;
-    }
-    Vector3 RK4(Vector3 y, float dt)
-    {
-        Vector3 acceleration = Vector3.zero;
-        foreach (BodyScript otherBody in Bodies)
-        {
-            if (otherBody != this)
-            {
-                float distance = ((otherBody.pos - y) * AUtometer).sqrMagnitude;
-                float accelerationMag = (gravitationalConstant * otherBody.mass / distance);
-                Vector3 k1 = (otherBody.pos - y) * accelerationMag;
-
-                Vector3 tempVel = partialStep(currVelocity, k1, 0.5f);
-                Vector3 tempPos = partialStep(pos, tempVel, 0.5f);
-
-                Vector3 k2 = (tempPos - (tempPos+(tempVel*0.5f*dt))) * accelerationMag;
-
-                tempVel = partialStep(currVelocity, k2, 0.5f);
-
-                Vector3 k3 = (tempPos - (tempPos+(tempVel*0.5f*dt))) * accelerationMag;
-
-                tempVel = partialStep(currVelocity, k3, 1);
-                tempPos = partialStep(pos, tempVel, 0.5f);
-
-                Vector3 k4 = (otherBody.pos - (tempPos+(tempVel*0.5f*dt))) * accelerationMag;
-                acceleration += (k1 + (2*k2) + (2*k3) + k4)/6;
-            }
-        };
-        return acceleration;
-    }
-    Vector3 partialStep(Vector3 p1, Vector3 p2, float dt)
-    {
-        return (p1 + (p2*dt));
     }
 }

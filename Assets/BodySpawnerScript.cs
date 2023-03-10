@@ -46,6 +46,8 @@ public class BodySpawnerScript : MonoBehaviour
             foreach (BodyScript updateBody in bodies)
             {
                 updateBody.pos = updateBody.k3;
+                updateBody.k3Acc = updateBody.calculateAcceleration();
+                updateBody.pos = updateBody.k4;
             }
             foreach (BodyScript updateBody in bodies)
             {
