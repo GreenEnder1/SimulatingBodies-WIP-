@@ -61,7 +61,7 @@ public class BodySpawnerScript : MonoBehaviour
                 }
             }
         }
-        if (stepCount*timeStep >= Mathf.Pow(10, 10) && active == true)
+        if (stepCount*timeStep >= Mathf.Pow(10, 7) && active == true)
         {
             active = false;
             foreach (BodyScript updateBody in bodies)
