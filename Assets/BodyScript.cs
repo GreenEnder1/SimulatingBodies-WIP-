@@ -152,6 +152,7 @@ public class BodyScript : MonoBehaviour
         prevAvgDistDiff = avgDistDiff;
         currRecordedPositions.Clear();
         transform.position = Initpos;
+        pos = Initpos;
         currVelocity = initVelocity;
         posIndex = 0;
         positions.Clear();
